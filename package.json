@@ -1,6 +1,6 @@
 {
   "name": "@lyeve-labs/client-grpc",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "gRPC gateway client for LyEve Core - typed Schema and Content service operations",
   "license": "MIT",
   "author": "LyEve <info@lyeve.com>",
