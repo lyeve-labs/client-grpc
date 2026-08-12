@@ -41,7 +41,7 @@ Schema and Content services over gRPC. Same `HttpClient`, different transport.
 ## Requirements
 
 - **Node 20** or newer
-- **[@lyeve-labs/client](https://www.npmjs.com/package/@lyeve-labs/client)** `>=0.1.0`
+- **[@lyeve-labs/client](https://www.npmjs.com/package/@lyeve-labs/client)** `>=0.2.1`
 - A running CMS gRPC gateway on port `:3004`
 
 ## Install
