@@ -1,7 +1,7 @@
 /**
  * gRPC gateway client for LyEve CMS.
  *
- * The CMS gRPC plugin (core-plugin-grpc) exposes a REST-transcoded mirror
+ * The CMS gRPC plugin (lyeve-plugin-grpc) exposes a REST-transcoded mirror
  * on port :3004. This module provides typed functions for SchemaService and
  * ContentService operations.
  *
