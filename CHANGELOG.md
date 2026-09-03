@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-09-02
+
+### Fixed
+
+- `createContent` and `updateContent` wrapped the record in a `data` envelope.
+  The gRPC gateway decodes the whole body as the record - unlike the v1 Content
+  API on port 3002, which does take an envelope - so every write produced an
+  entry with a single field literally named `data`. The test asserted the
+  envelope, which is why this passed.
+
+
+## [0.1.4] - 2026-09-02
+
+### Changed
+
+- CONTRIBUTING documents the branch model. It covered commits and releases but never said which branch a change starts from: work branches off `dev` and the PR goes back into `dev`, while `main` takes merges and carries the release tags.
+
 ## [0.1.3] - 2026-08-12
 
 ### Changed

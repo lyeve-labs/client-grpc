@@ -223,7 +223,9 @@ describe("ContentService (gRPC gateway)", () => {
       const [url, init] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/article");
       expect(init.method).toBe("POST");
-      expect(JSON.parse(init.body as string)).toEqual({ data });
+      // The gateway decodes the whole body as the record, unlike the v1
+      // Content API, which decodes {"data": {...}}.
+      expect(JSON.parse(init.body as string)).toEqual(data);
     });
 
     it("encodes schema name in URL", async () => {
@@ -261,7 +263,9 @@ describe("ContentService (gRPC gateway)", () => {
       const [url, init] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/article/abc-123");
       expect(init.method).toBe("PUT");
-      expect(JSON.parse(init.body as string)).toEqual({ data });
+      // The gateway decodes the whole body as the record, unlike the v1
+      // Content API, which decodes {"data": {...}}.
+      expect(JSON.parse(init.body as string)).toEqual(data);
     });
 
     it("encodes schema name and id in URL", async () => {

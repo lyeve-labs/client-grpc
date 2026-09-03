@@ -1,7 +1,7 @@
 /**
  * gRPC gateway client for LyEve CMS.
  *
- * The CMS gRPC plugin (core-plugin-grpc) exposes a REST-transcoded mirror
+ * The CMS gRPC plugin (lyeve-plugin-grpc) exposes a REST-transcoded mirror
  * on port :3004. This module provides typed functions for SchemaService and
  * ContentService operations.
  *
@@ -63,7 +63,14 @@ export function getContent(
   );
 }
 
-/** POST /api/content/{schema} - create an entry via gRPC gateway. */
+/**
+ * POST /api/content/{schema} - create an entry via gRPC gateway.
+ *
+ * The gateway takes the record itself, with no envelope. This differs from the
+ * v1 Content API on port 3002, which decodes `{"data": {...}}`; the gateway
+ * decodes the whole body as the record. Sending an envelope here produced an
+ * entry with one field literally named `data`.
+ */
 export function createContent(
   schemaName: string,
   data: Record<string, unknown>,
@@ -71,11 +78,15 @@ export function createContent(
 ): Promise<Content> {
   return client.post<Content>(
     `/api/content/${encodeURIComponent(schemaName)}`,
-    { data },
+    data,
   );
 }
 
-/** PUT /api/content/{schema}/{id} - update an entry via gRPC gateway. */
+/**
+ * PUT /api/content/{schema}/{id} - update an entry via gRPC gateway.
+ *
+ * As with create, the gateway takes the record itself and no envelope.
+ */
 export function updateContent(
   schemaName: string,
   id: string,
@@ -84,7 +95,7 @@ export function updateContent(
 ): Promise<Content> {
   return client.put<Content>(
     `/api/content/${encodeURIComponent(schemaName)}/${encodeURIComponent(id)}`,
-    { data },
+    data,
   );
 }
 
