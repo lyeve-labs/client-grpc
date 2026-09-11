@@ -38,7 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   entry with a single field literally named `data`. The test asserted the
   envelope, which is why this passed.
 
-
 ## [0.1.4] - 2026-09-02
 
 ### Changed
