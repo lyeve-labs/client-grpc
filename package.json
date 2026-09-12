@@ -1,13 +1,21 @@
 {
   "name": "@lyeve-labs/client-grpc",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "gRPC gateway client for LyEve Core - typed Schema and Content service operations",
   "license": "MIT",
   "author": "LyEve <info@lyeve.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lyeve-labs/client-grpc.git"
+  },
+  "homepage": "https://github.com/lyeve-labs/client-grpc#readme",
+  "bugs": {
+    "url": "https://github.com/lyeve-labs/client-grpc/issues"
+  },
   "type": "module",
   "packageManager": "pnpm@11.25.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -35,13 +43,15 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup && publint && node scripts/check-dist.mjs",
+    "build": "pnpm version:check && tsup && publint && node scripts/check-dist.mjs",
+    "version:check": "node scripts/check-version.mjs",
     "check": "tsc --noEmit",
     "test": "vitest run",
     "dev": "tsup --watch",
     "test:watch": "vitest",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
     "@lyeve-labs/client": ">=0.2.1"

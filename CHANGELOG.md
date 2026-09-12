@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-09-12
+
+### Fixed
+
+- The package manifest carries `repository`, `homepage` and `bugs`, so the npm
+  page links back to the source and the issue tracker. It published with none
+  of the three, which left a reader on npm with no way back to the code.
+
+### Changed
+
+- The declared Node floor is 24. Continuous integration has run on Node 24 for
+  some time and the manifest still said 20, which described a runtime nothing
+  was tested against. Node 22 consumers are no longer within the declared
+  range.
+- `prepublishOnly` runs the build, so a publish cannot skip the package lint,
+  the dist check or the version check. All three ran only from the build
+  script before, and a bare publish uploaded whatever `dist` happened to hold.
+  The version check refuses when `package.json` and the CHANGELOG head name
+  different versions.
+
 ## [0.2.2] - 2026-09-09
 
 ### Changed
@@ -24,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tag, with the version beside it so the reference stays readable. This package
   publishes to npm and its workflows hold a publish token, and a tag is a moving
   reference the action author can repoint at any time.
-- Built on Go 1.27.1, node 26.8.1 and pnpm 11.25.0. The estate had been building
+- Built on Go 1.27.1, node 26.8.1 and pnpm 11.25.0. The organisation had been building
   on two Go versions at once, resolved by which directory you were standing in.
 - Build scripts are named explicitly, which pnpm 11 requires before it runs them.
 
@@ -37,7 +57,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   API on port 3002, which does take an envelope - so every write produced an
   entry with a single field literally named `data`. The test asserted the
   envelope, which is why this passed.
-
 
 ## [0.1.4] - 2026-09-02
 
