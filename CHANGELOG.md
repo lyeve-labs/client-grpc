@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tag, with the version beside it so the reference stays readable. This package
   publishes to npm and its workflows hold a publish token, and a tag is a moving
   reference the action author can repoint at any time.
-- Built on Go 1.27.1, node 26.8.1 and pnpm 11.25.0. The estate had been building
+- Built on Go 1.27.1, node 26.8.1 and pnpm 11.25.0. The organisation had been building
   on two Go versions at once, resolved by which directory you were standing in.
 - Build scripts are named explicitly, which pnpm 11 requires before it runs them.
 
