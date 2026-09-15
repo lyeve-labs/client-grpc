@@ -1,7 +1,7 @@
 {
   "name": "@lyeve-labs/client-grpc",
   "version": "0.2.3",
-  "description": "gRPC gateway client for LyEve Core - typed Schema and Content service operations",
+  "description": "Typed HTTP client for the LyEve gRPC plugin's REST gateway: Schema and Content service operations over fetch, not gRPC",
   "license": "MIT",
   "author": "LyEve <info@lyeve.com>",
   "repository": {
