@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- The README, the package description and the module comment say what the
+  package is: a typed HTTP client for the gRPC plugin's REST gateway, over
+  `fetch`. It never opens a gRPC connection, and the old wording ("over gRPC",
+  "different transport") read as if it did. The README also names the
+  sidecar's address variable and that the gateway refuses every call without
+  a bearer, and every call at all when the engine has no JWT secret.
+
 ## [0.2.3] - 2026-09-12
 
 ### Fixed
