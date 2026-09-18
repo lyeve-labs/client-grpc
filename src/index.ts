@@ -1,9 +1,11 @@
 /**
- * gRPC gateway client for LyEve CMS.
+ * Typed HTTP client for the LyEve gRPC plugin's REST gateway.
  *
- * The CMS gRPC plugin (lyeve-plugin-grpc) exposes a REST-transcoded mirror
- * on port :3004. This module provides typed functions for SchemaService and
- * ContentService operations.
+ * The plugin serves a plain HTTP/JSON mirror of SchemaService and
+ * ContentService on its health sidecar (GRPC_HEALTH_ADDR, default
+ * 127.0.0.1:3004). Everything here goes over fetch; nothing opens a gRPC
+ * connection, so a consumer who needs HTTP/2 and protobuf generates a
+ * client from the plugin's .proto files instead.
  *
  * HTTP paths use /api/schemas/* and /api/content/* (REST-transcoded),
  * not the admin /api/admin/* or content /api/v1/* paths.
