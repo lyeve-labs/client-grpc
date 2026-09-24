@@ -46,7 +46,7 @@ over HTTP with the same `HttpClient` every other `@lyeve-labs` package uses.
 
 ## Requirements
 
-- **Node 20** or newer
+- **Node 24** or newer
 - **[@lyeve-labs/client](https://www.npmjs.com/package/@lyeve-labs/client)** `>=0.2.1`
 - A running LyEve engine with the `grpc` plugin licensed, and its REST gateway
   reachable: the sidecar binds loopback until `GRPC_HEALTH_ADDR` names
