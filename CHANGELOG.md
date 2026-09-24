@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   "different transport") read as if it did. The README also names the
   sidecar's address variable and that the gateway refuses every call without
   a bearer, and every call at all when the engine has no JWT secret.
+- The README's Node floor reads 24, as `package.json` has since 0.2.3.
 
 ## [0.2.3] - 2026-09-12
 
