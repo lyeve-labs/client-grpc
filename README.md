@@ -2,7 +2,7 @@
 
 A typed HTTP client for the LyEve gRPC plugin's REST gateway. It calls the
 plain HTTP/JSON mirror the plugin serves on its health sidecar (`GRPC_HEALTH_ADDR`,
-default `127.0.0.1:3004`) with `fetch`; it never opens a gRPC connection and
+default `127.0.0.1:3004`) with `fetch`. It never opens a gRPC connection and
 does not speak HTTP/2 or protobuf. Use it when you want the gateway's paths and
 types without a gRPC runtime. For a real gRPC client, generate one from the
 plugin's `.proto` files or use `@grpc/grpc-js` against `GRPC_ADDR` (default
@@ -50,7 +50,7 @@ over HTTP with the same `HttpClient` every other `@lyeve-labs` package uses.
 - **[@lyeve-labs/client](https://www.npmjs.com/package/@lyeve-labs/client)** `>=0.2.1`
 - A running LyEve engine with the `grpc` plugin licensed, and its REST gateway
   reachable: the sidecar binds loopback until `GRPC_HEALTH_ADDR` names
-  `0.0.0.0:<port>` and the port is mapped. Every request needs a bearer; the
+  `0.0.0.0:<port>` and the port is mapped. Every request needs a bearer. The
   gateway refuses unauthenticated calls, and refuses every call when the
   engine has no JWT secret configured.
 
@@ -128,7 +128,7 @@ tests/               # vitest test suite
 ## Versioning
 
 `@lyeve-labs/client-grpc` follows [SemVer](https://semver.org). While under `1.0`,
-breaking changes bump the **minor** version; additive changes bump the **patch**.
+breaking changes bump the **minor** version. Additive changes bump the **patch**.
 Every release is logged in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Contributing
