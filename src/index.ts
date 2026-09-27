@@ -26,7 +26,7 @@ import type { Schema, Content } from "@lyeve-labs/client";
 
 // SchemaService
 
-/** GET /api/schemas - list all schemas via gRPC gateway. */
+/** GET /api/schemas: list all schemas via gRPC gateway. */
 export function listSchemas(client: HttpClient): Promise<Schema[]> {
   return client.get<Schema[]>("/api/schemas");
 }
