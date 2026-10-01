@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-10-01
+
+### Changed
+
+- The README, the package description and the module comment say what the
+  package is: a typed HTTP client for the gRPC plugin's REST gateway, over
+  `fetch`. It never opens a gRPC connection, and the old wording ("over gRPC",
+  "different transport") read as if it did. The README also names the
+  sidecar's address variable and that the gateway refuses every call without
+  a bearer, and every call at all when the engine has no JWT secret.
+- The README's Node floor reads 24, as `package.json` has since 0.2.3.
+
 ## [0.2.3] - 2026-09-12
 
 ### Fixed
@@ -32,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation and shipped strings no longer carry em dashes, unicode
   ellipses or unicode bullets. Where a string is an error or a log line the
   wording changed and nothing else: status codes, machine-readable error codes
-  and behaviour are untouched, so a client matching on a code is unaffected.
+  and behavior are untouched, so a client matching on a code is unaffected.
 - An elision inside a code span now uses three ASCII periods, so a reader who
   copies one gets something their tool accepts.
 
@@ -44,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tag, with the version beside it so the reference stays readable. This package
   publishes to npm and its workflows hold a publish token, and a tag is a moving
   reference the action author can repoint at any time.
-- Built on Go 1.27.1, node 26.8.1 and pnpm 11.25.0. The organisation had been building
+- Built on Go 1.27.1, node 26.8.1 and pnpm 11.25.0. The organization had been building
   on two Go versions at once, resolved by which directory you were standing in.
 - Build scripts are named explicitly, which pnpm 11 requires before it runs them.
 

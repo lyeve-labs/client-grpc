@@ -1,7 +1,12 @@
 # @lyeve-labs/client-grpc
 
-Typed functions for the CMS gRPC gateway. Targets the REST-transcoded gRPC
-gateway on port `:3004`.
+A typed HTTP client for the LyEve gRPC plugin's REST gateway. It calls the
+plain HTTP/JSON mirror the plugin serves on its health sidecar (`GRPC_HEALTH_ADDR`,
+default `127.0.0.1:3004`) with `fetch`. It never opens a gRPC connection and
+does not speak HTTP/2 or protobuf. Use it when you want the gateway's paths and
+types without a gRPC runtime. For a real gRPC client, generate one from the
+plugin's `.proto` files or use `@grpc/grpc-js` against `GRPC_ADDR` (default
+`127.0.0.1:3003`) with the `application/grpc+json` content subtype.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6.svg)](https://www.typescriptlang.org)
@@ -27,22 +32,27 @@ const schemas = await listSchemas(client);
 const entries = await listContent("articles", client, 50, 0);
 ```
 
-Schema and Content services over gRPC. Same `HttpClient`, different transport.
+The same SchemaService and ContentService the plugin serves over gRPC, reached
+over HTTP with the same `HttpClient` every other `@lyeve-labs` package uses.
 
 ---
 
 ## What's in the box
 
-- **SchemaService:** list and get schemas over the gRPC gateway.
+- **SchemaService:** list and get schemas through the REST gateway.
 - **ContentService:** full CRUD for content entries. List, get, create, update, delete.
 - **Same `HttpClient`:** reuses the same dependency-injection pattern as every other SDK.
 - **Typed end-to-end:** request parameters and response shapes are fully typed.
 
 ## Requirements
 
-- **Node 20** or newer
+- **Node 24** or newer
 - **[@lyeve-labs/client](https://www.npmjs.com/package/@lyeve-labs/client)** `>=0.2.1`
-- A running CMS gRPC gateway on port `:3004`
+- A running LyEve engine with the `grpc` plugin licensed, and its REST gateway
+  reachable: the sidecar binds loopback until `GRPC_HEALTH_ADDR` names
+  `0.0.0.0:<port>` and the port is mapped. Every request needs a bearer. The
+  gateway refuses unauthenticated calls, and refuses every call when the
+  engine has no JWT secret configured.
 
 ## Install
 
@@ -95,7 +105,8 @@ await deleteContent("articles", article.id, client);
 | ContentService | `deleteContent(schema, id, client)`            | `DELETE /api/content/{schema}/{id}` |
 
 Gateway paths use `/api/schemas/*` and `/api/content/*`. Not the admin
-`/api/admin/*` or content `/api/v1/*` paths.
+`/api/admin/*` or content `/api/v1/*` paths. Write bodies are the raw field map,
+not the `{"data": {...}}` envelope the content API on `:3002` takes.
 
 ## Local development
 
@@ -117,7 +128,7 @@ tests/               # vitest test suite
 ## Versioning
 
 `@lyeve-labs/client-grpc` follows [SemVer](https://semver.org). While under `1.0`,
-breaking changes bump the **minor** version; additive changes bump the **patch**.
+breaking changes bump the **minor** version. Additive changes bump the **patch**.
 Every release is logged in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Contributing
