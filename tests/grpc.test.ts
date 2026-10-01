@@ -25,7 +25,7 @@ function mkClient(body: unknown = {}, status = 200) {
 
 // SchemaService (REST-transcoded gRPC)
 
-describe("SchemaService (gRPC gateway)", () => {
+describe("SchemaService (REST gateway)", () => {
   // listSchemas
 
   describe("listSchemas()", () => {
@@ -99,7 +99,7 @@ describe("SchemaService (gRPC gateway)", () => {
 
 // ContentService (REST-transcoded gRPC)
 
-describe("ContentService (gRPC gateway)", () => {
+describe("ContentService (REST gateway)", () => {
   const sampleContent = {
     id: "abc-123",
     schema_name: "article",
