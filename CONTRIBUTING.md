@@ -3,8 +3,8 @@
 ## Quick start
 
 ```bash
-git clone git@github.com:lyeve-labs/cms-client-grpc.git
-cd cms-client-grpc
+git clone https://github.com/lyeve-labs/client-grpc.git
+cd client-grpc
 pnpm install
 pnpm test         # verify everything works
 ```
