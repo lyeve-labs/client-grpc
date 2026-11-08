@@ -153,6 +153,41 @@ describe("ContentService (REST gateway)", () => {
       expect(url).toBe("/api/content/article?limit=10&offset=0&locale=pt-BR");
     });
 
+    it("sends filters, fields, populate and depth", async () => {
+      const { client, fetchFn } = mkClient({ items: [] });
+
+      await listContent("article", client, undefined, undefined, {
+        filters: { featured: "true", "author id": "a&b" },
+        fields: ["title", "author"],
+        populate: ["author{name,bio}", "tags"],
+        depth: 2,
+      });
+
+      const [url] = fetchFn.mock.calls[0];
+      const sent = new URL(url, "http://gateway");
+      expect(sent.pathname).toBe("/api/content/article");
+      expect([...sent.searchParams]).toEqual([
+        ["fields", "title,author"],
+        ["populate", "author{name,bio},tags"],
+        ["depth", "2"],
+        ["filters[featured]", "true"],
+        ["filters[author id]", "a&b"],
+      ]);
+    });
+
+    it("sends no read option left empty", async () => {
+      const { client, fetchFn } = mkClient({ items: [] });
+
+      await listContent("article", client, undefined, undefined, {
+        filters: {},
+        fields: [],
+        populate: [],
+      });
+
+      const [url] = fetchFn.mock.calls[0];
+      expect(url).toBe("/api/content/article");
+    });
+
     it("encodes schema name in URL", async () => {
       const { client, fetchFn } = mkClient({ items: [] });
 
@@ -200,6 +235,24 @@ describe("ContentService (REST gateway)", () => {
       expect(result.resolved_locale).toBe("pt-BR");
       const [url] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/article/abc-123?locale=pt-BR");
+    });
+
+    it("sends fields, populate and depth beside the locale", async () => {
+      const populated = { ...row, author: { id: "a-1", name: "Ann" } };
+      const { client, fetchFn } = mkClient({ item: populated });
+
+      const result = await getContent("article", "abc-123", client, {
+        locale: "pt-BR",
+        fields: ["title", "author"],
+        populate: ["author"],
+        depth: 0,
+      });
+
+      expect(result.author).toEqual({ id: "a-1", name: "Ann" });
+      const [url] = fetchFn.mock.calls[0];
+      expect(url).toBe(
+        "/api/content/article/abc-123?locale=pt-BR&fields=title%2Cauthor&populate=author&depth=0",
+      );
     });
 
     it("encodes both schema name and id", async () => {
