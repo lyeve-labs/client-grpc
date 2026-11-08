@@ -42,7 +42,7 @@ over HTTP with the same `HttpClient` every other `@lyeve-labs` package uses.
 - **SchemaService:** list and get schemas through the REST gateway.
 - **ContentService:** full CRUD for content entries. List, get, create, update, delete.
 - **Same `HttpClient`:** reuses the same dependency-injection pattern as every other SDK.
-- **Typed end-to-end:** request parameters and response shapes are fully typed.
+- **Typed to the wire:** each function returns the gateway's answer out of its wrapper, typed as the gateway sends it.
 
 ## Requirements
 
@@ -94,19 +94,35 @@ await deleteContent("articles", article.id, client);
 
 ## API
 
-| Service        | Function                                       | HTTP                                |
-| -------------- | ---------------------------------------------- | ----------------------------------- |
-| SchemaService  | `listSchemas(client)`                          | `GET /api/schemas`                  |
-| SchemaService  | `getSchema(name, client)`                      | `GET /api/schemas/{name}`           |
-| ContentService | `listContent(schema, client, limit?, offset?)` | `GET /api/content/{schema}`         |
-| ContentService | `getContent(schema, id, client)`               | `GET /api/content/{schema}/{id}`    |
-| ContentService | `createContent(schema, data, client)`          | `POST /api/content/{schema}`        |
-| ContentService | `updateContent(schema, id, data, client)`      | `PUT /api/content/{schema}/{id}`    |
-| ContentService | `deleteContent(schema, id, client)`            | `DELETE /api/content/{schema}/{id}` |
+| Service        | Function                                                 | HTTP                                |
+| -------------- | -------------------------------------------------------- | ----------------------------------- |
+| SchemaService  | `listSchemas(client)`                                    | `GET /api/schemas`                  |
+| SchemaService  | `getSchema(name, client)`                                | `GET /api/schemas/{name}`           |
+| ContentService | `listContent(schema, client, limit?, offset?, options?)` | `GET /api/content/{schema}`         |
+| ContentService | `getContent(schema, id, client, options?)`               | `GET /api/content/{schema}/{id}`    |
+| ContentService | `createContent(schema, data, client)`                    | `POST /api/content/{schema}`        |
+| ContentService | `updateContent(schema, id, data, client)`                | `PUT /api/content/{schema}/{id}`    |
+| ContentService | `deleteContent(schema, id, client)`                      | `DELETE /api/content/{schema}/{id}` |
 
 Gateway paths use `/api/schemas/*` and `/api/content/*`. Not the admin
 `/api/admin/*` or content `/api/v1/*` paths. Write bodies are the raw field map,
 not the `{"data": {...}}` envelope the content API on `:3002` takes.
+
+Answers come back the same way. A schema is a `GatewaySchema`, its name and
+stored definition. An entry is a `GatewayRow`, the stored row, flat: each field
+sits beside `id` under its column name (a relation under its column, such as
+`author_id`), with the timestamps and the other system columns the content type
+keeps, and no `data` envelope.
+
+`listContent` returns rows in id order. A gateway from the gRPC plugin's next
+release on takes a limit of 1 to 500 (50 when left out) and an offset of 0 or
+more, and refuses a value that is not an integer with 400. An earlier gateway
+drops both and serves the first 50 rows.
+
+`listContent` and `getContent` take `{ locale }` last. When the localization
+plugin is on, rows are served in that language, each carries `resolved_locale`,
+and a value that is not a language tag is refused with 400. Without the plugin
+the value is ignored.
 
 ## Local development
 

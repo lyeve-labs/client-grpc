@@ -22,47 +22,99 @@
  */
 
 import type { HttpClient } from "@lyeve-labs/client";
-import type { Schema, Content } from "@lyeve-labs/client";
+
+/**
+ * A content type as the gateway serves it: its name and its stored
+ * definition, as JSON.
+ */
+export interface GatewaySchema {
+  name: string;
+  definition: Record<string, unknown>;
+}
+
+/**
+ * An entry as the gateway serves it: the stored row, flat. Each field sits
+ * beside `id` under its column name (a relation under its column, such as
+ * `author_id`), with the timestamps and the other system columns the content
+ * type keeps. There is no `data` envelope. A localized read adds
+ * `resolved_locale`, the locale that answered.
+ */
+export interface GatewayRow {
+  id: string;
+  [column: string]: unknown;
+}
+
+/** Options for a content read through the gateway. */
+export interface GatewayReadOptions {
+  /**
+   * The language tag to serve rows in. When the localization plugin is on,
+   * rows are served in it and a value that is not a language tag is refused
+   * with 400. Without the plugin the value is ignored.
+   */
+  locale?: string;
+}
 
 // SchemaService
 
 /** GET /api/schemas: list all schemas via gRPC gateway. */
-export function listSchemas(client: HttpClient): Promise<Schema[]> {
-  return client.get<Schema[]>("/api/schemas");
+export async function listSchemas(
+  client: HttpClient,
+): Promise<GatewaySchema[]> {
+  // The gateway answers {"schemas": [...]}, the shape of ListSchemasResponse.
+  const res = await client.get<{ schemas: GatewaySchema[] }>("/api/schemas");
+  return res.schemas;
 }
 
 /** GET /api/schemas/{name} - get a single schema via gRPC gateway. */
-export function getSchema(name: string, client: HttpClient): Promise<Schema> {
-  return client.get<Schema>(`/api/schemas/${encodeURIComponent(name)}`);
+export function getSchema(
+  name: string,
+  client: HttpClient,
+): Promise<GatewaySchema> {
+  return client.get<GatewaySchema>(`/api/schemas/${encodeURIComponent(name)}`);
 }
 
 // ContentService
 
-/** GET /api/content/{schema} - list content entries via gRPC gateway. */
-export function listContent(
+/**
+ * GET /api/content/{schema}: list rows via gRPC gateway, in id order. A
+ * gateway from the gRPC plugin's next release on takes a limit of 1 to 500
+ * (50 when left out) and an offset of 0 or more, and refuses a value that is
+ * not an integer with 400. An earlier gateway drops both and serves the
+ * first 50 rows.
+ */
+export async function listContent(
   schemaName: string,
   client: HttpClient,
   limit?: number,
   offset?: number,
-): Promise<Content[]> {
+  options: GatewayReadOptions = {},
+): Promise<GatewayRow[]> {
   const params = new URLSearchParams();
   if (limit !== undefined) params.set("limit", String(limit));
   if (offset !== undefined) params.set("offset", String(offset));
+  if (options.locale) params.set("locale", options.locale);
   const qs = params.toString();
-  return client.get<Content[]>(
+  // The gateway answers {"items": [...]}, the shape of ListContentResponse.
+  const res = await client.get<{ items: GatewayRow[] }>(
     `/api/content/${encodeURIComponent(schemaName)}${qs ? `?${qs}` : ""}`,
   );
+  return res.items;
 }
 
 /** GET /api/content/{schema}/{id} - get a single entry via gRPC gateway. */
-export function getContent(
+export async function getContent(
   schemaName: string,
   id: string,
   client: HttpClient,
-): Promise<Content> {
-  return client.get<Content>(
-    `/api/content/${encodeURIComponent(schemaName)}/${encodeURIComponent(id)}`,
+  options: GatewayReadOptions = {},
+): Promise<GatewayRow> {
+  const qs = options.locale
+    ? `?${new URLSearchParams({ locale: options.locale })}`
+    : "";
+  const res = await client.get<{ item: GatewayRow }>(
+    `/api/content/${encodeURIComponent(schemaName)}/${encodeURIComponent(id)}${qs}`,
   );
+  return res.item;
 }
 
 /**
@@ -73,15 +125,16 @@ export function getContent(
  * decodes the whole body as the record. Sending an envelope here produced an
  * entry with one field literally named `data`.
  */
-export function createContent(
+export async function createContent(
   schemaName: string,
   data: Record<string, unknown>,
   client: HttpClient,
-): Promise<Content> {
-  return client.post<Content>(
+): Promise<GatewayRow> {
+  const res = await client.post<{ item: GatewayRow }>(
     `/api/content/${encodeURIComponent(schemaName)}`,
     data,
   );
+  return res.item;
 }
 
 /**
@@ -89,25 +142,27 @@ export function createContent(
  *
  * As with create, the gateway takes the record itself and no envelope.
  */
-export function updateContent(
+export async function updateContent(
   schemaName: string,
   id: string,
   data: Record<string, unknown>,
   client: HttpClient,
-): Promise<Content> {
-  return client.put<Content>(
+): Promise<GatewayRow> {
+  const res = await client.put<{ item: GatewayRow }>(
     `/api/content/${encodeURIComponent(schemaName)}/${encodeURIComponent(id)}`,
     data,
   );
+  return res.item;
 }
 
 /** DELETE /api/content/{schema}/{id} - delete an entry via gRPC gateway. */
-export function deleteContent(
+export async function deleteContent(
   schemaName: string,
   id: string,
   client: HttpClient,
 ): Promise<void> {
-  return client.delete<void>(
+  // The gateway answers 200 {"deleted": id}, which carries nothing new.
+  await client.delete<unknown>(
     `/api/content/${encodeURIComponent(schemaName)}/${encodeURIComponent(id)}`,
   );
 }
