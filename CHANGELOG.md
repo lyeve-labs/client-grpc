@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Breaking: every function returns the gateway's answer as the gateway sends it, typed as `GatewaySchema` (a schema's name and stored definition) or `GatewayRow` (an entry's stored row, flat, with its fields beside `id` and no `data` envelope).
+  - `listSchemas`, `listContent`, `getContent`, `createContent` and `updateContent` returned the gateway's wrapper (`{"schemas": [...]}`, `{"items": [...]}` or `{"item": {...}}`) typed as the value inside it. They now return that value, so code that read the wrapper, such as `(await listSchemas(client) as any).schemas`, reads the result directly.
+  - `getSchema` returned the right object typed as a `Schema`, whose `display_name` and `fields` the gateway never sends.
+  - `deleteContent` resolves to `undefined`, as its type said, rather than to the gateway's `{"deleted": id}`.
+- `limit` and `offset` on `listContent` take effect with the gRPC plugin's next release, whose gateway reads them. An earlier gateway drops both and serves the first 50 rows.
+
 ## [0.2.5] - 2026-10-22
 
 ### Changed

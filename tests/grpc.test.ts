@@ -23,33 +23,41 @@ function mkClient(body: unknown = {}, status = 200) {
   return { client: createClient(fetchFn as unknown as typeof fetch), fetchFn };
 }
 
+// Each fixture is the body the gateway writes: the service response struct,
+// encoded as it is.
+
+const schema = {
+  name: "article",
+  definition: { name: "article", fields: [{ name: "title" }] },
+};
+
+const row = {
+  id: "abc-123",
+  title: "Test",
+  author_id: "user-1",
+  created_at: "2026-07-22T00:00:00Z",
+  updated_at: "2026-07-22T00:00:00Z",
+};
+
 // SchemaService (REST-transcoded gRPC)
 
 describe("SchemaService (REST gateway)", () => {
-  // listSchemas
-
   describe("listSchemas()", () => {
-    it("GETs /api/schemas and returns the schema list", async () => {
-      const schemas = [
-        { name: "article", display_name: "Article", fields: [] },
-      ];
-      const { client, fetchFn } = mkClient(schemas);
+    it("GETs /api/schemas and returns the schemas out of their wrapper", async () => {
+      const { client, fetchFn } = mkClient({ schemas: [schema] });
 
       const result = await listSchemas(client);
 
-      expect(result).toEqual(schemas);
+      expect(result).toEqual([schema]);
       const [url, init] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/schemas");
       expect(init.method).toBe("GET");
     });
 
     it("returns an empty array when no schemas exist", async () => {
-      const { client, fetchFn } = mkClient([]);
+      const { client } = mkClient({ schemas: [] });
 
-      const result = await listSchemas(client);
-
-      expect(result).toEqual([]);
-      expect(fetchFn).toHaveBeenCalledTimes(1);
+      expect(await listSchemas(client)).toEqual([]);
     });
 
     it("propagates API errors", async () => {
@@ -62,11 +70,8 @@ describe("SchemaService (REST gateway)", () => {
     });
   });
 
-  // getSchema
-
   describe("getSchema()", () => {
-    it("GETs /api/schemas/{name} and returns the schema", async () => {
-      const schema = { name: "article", display_name: "Article", fields: [] };
+    it("GETs /api/schemas/{name} and returns the name and definition", async () => {
       const { client, fetchFn } = mkClient(schema);
 
       const result = await getSchema("article", client);
@@ -78,7 +83,7 @@ describe("SchemaService (REST gateway)", () => {
     });
 
     it("encodes special characters in schema name", async () => {
-      const { client, fetchFn } = mkClient({});
+      const { client, fetchFn } = mkClient(schema);
 
       await getSchema("my schema", client);
 
@@ -100,30 +105,20 @@ describe("SchemaService (REST gateway)", () => {
 // ContentService (REST-transcoded gRPC)
 
 describe("ContentService (REST gateway)", () => {
-  const sampleContent = {
-    id: "abc-123",
-    schema_name: "article",
-    data: { title: "Test" },
-    created_at: "2026-07-22T00:00:00Z",
-    updated_at: "2026-07-22T00:00:00Z",
-  };
-
-  // listContent
-
   describe("listContent()", () => {
-    it("GETs /api/content/{schema} with no pagination params", async () => {
-      const { client, fetchFn } = mkClient([sampleContent]);
+    it("GETs /api/content/{schema} and returns the rows out of their wrapper", async () => {
+      const { client, fetchFn } = mkClient({ items: [row] });
 
       const result = await listContent("article", client);
 
-      expect(result).toEqual([sampleContent]);
+      expect(result).toEqual([row]);
       const [url, init] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/article");
       expect(init.method).toBe("GET");
     });
 
     it("includes limit and offset when both provided", async () => {
-      const { client, fetchFn } = mkClient([]);
+      const { client, fetchFn } = mkClient({ items: [] });
 
       await listContent("article", client, 10, 20);
 
@@ -132,7 +127,7 @@ describe("ContentService (REST gateway)", () => {
     });
 
     it("includes only limit when offset is omitted", async () => {
-      const { client, fetchFn } = mkClient([]);
+      const { client, fetchFn } = mkClient({ items: [] });
 
       await listContent("article", client, 5);
 
@@ -141,7 +136,7 @@ describe("ContentService (REST gateway)", () => {
     });
 
     it("includes only offset when limit is omitted", async () => {
-      const { client, fetchFn } = mkClient([]);
+      const { client, fetchFn } = mkClient({ items: [] });
 
       await listContent("article", client, undefined, 10);
 
@@ -150,7 +145,7 @@ describe("ContentService (REST gateway)", () => {
     });
 
     it("encodes schema name in URL", async () => {
-      const { client, fetchFn } = mkClient([]);
+      const { client, fetchFn } = mkClient({ items: [] });
 
       await listContent("my schema", client);
 
@@ -158,12 +153,10 @@ describe("ContentService (REST gateway)", () => {
       expect(url).toBe("/api/content/my%20schema");
     });
 
-    it("returns empty array when no content exists", async () => {
-      const { client } = mkClient([]);
+    it("returns an empty array when no rows exist", async () => {
+      const { client } = mkClient({ items: [] });
 
-      const result = await listContent("article", client);
-
-      expect(result).toEqual([]);
+      expect(await listContent("article", client)).toEqual([]);
     });
 
     it("propagates API errors", async () => {
@@ -175,22 +168,20 @@ describe("ContentService (REST gateway)", () => {
     });
   });
 
-  // getContent
-
   describe("getContent()", () => {
-    it("GETs /api/content/{schema}/{id} and returns the entry", async () => {
-      const { client, fetchFn } = mkClient(sampleContent);
+    it("GETs /api/content/{schema}/{id} and returns the row out of its wrapper", async () => {
+      const { client, fetchFn } = mkClient({ item: row });
 
       const result = await getContent("article", "abc-123", client);
 
-      expect(result).toEqual(sampleContent);
+      expect(result).toEqual(row);
       const [url, init] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/article/abc-123");
       expect(init.method).toBe("GET");
     });
 
     it("encodes both schema name and id", async () => {
-      const { client, fetchFn } = mkClient({});
+      const { client, fetchFn } = mkClient({ item: row });
 
       await getContent("my schema", "my id", client);
 
@@ -210,52 +201,47 @@ describe("ContentService (REST gateway)", () => {
     });
   });
 
-  // createContent
-
   describe("createContent()", () => {
-    it("POSTs to /api/content/{schema} with data", async () => {
-      const data = { title: "New Article" };
-      const { client, fetchFn } = mkClient(sampleContent);
+    it("POSTs the record to /api/content/{schema} and returns the stored row", async () => {
+      const data = { title: "Test" };
+      const { client, fetchFn } = mkClient({ item: row }, 201);
 
       const result = await createContent("article", data, client);
 
-      expect(result).toEqual(sampleContent);
+      expect(result).toEqual(row);
       const [url, init] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/article");
       expect(init.method).toBe("POST");
-      // The gateway decodes the whole body as the record, unlike the v1
-      // Content API, which decodes {"data": {...}}.
+      // The gateway takes the record itself, never a {"data": ...} envelope.
       expect(JSON.parse(init.body as string)).toEqual(data);
     });
 
     it("encodes schema name in URL", async () => {
-      const { client, fetchFn } = mkClient({});
+      const { client, fetchFn } = mkClient({ item: row }, 201);
 
-      await createContent("my schema", {}, client);
+      await createContent("my schema", { title: "x" }, client);
 
       const [url] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/my%20schema");
     });
 
     it("propagates validation errors", async () => {
-      const { client } = mkClient({ error: "title is required" }, 422);
+      const { client } = mkClient({ error: "title is required" }, 400);
 
       const err = await createContent("article", {}, client).catch(
         (e: unknown) => e,
       );
 
-      expect((err as any).status).toBe(422);
+      expect((err as any).status).toBe(400);
       expect((err as any).message).toBe("title is required");
     });
   });
 
-  // updateContent
-
   describe("updateContent()", () => {
-    it("PUTs to /api/content/{schema}/{id} with data", async () => {
+    it("PUTs the fields to /api/content/{schema}/{id} and returns the stored row", async () => {
       const data = { title: "Updated" };
-      const updated = { ...sampleContent, data };
-      const { client, fetchFn } = mkClient(updated);
+      const updated = { ...row, title: "Updated" };
+      const { client, fetchFn } = mkClient({ item: updated });
 
       const result = await updateContent("article", "abc-123", data, client);
 
@@ -263,15 +249,13 @@ describe("ContentService (REST gateway)", () => {
       const [url, init] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/article/abc-123");
       expect(init.method).toBe("PUT");
-      // The gateway decodes the whole body as the record, unlike the v1
-      // Content API, which decodes {"data": {...}}.
       expect(JSON.parse(init.body as string)).toEqual(data);
     });
 
     it("encodes schema name and id in URL", async () => {
-      const { client, fetchFn } = mkClient({});
+      const { client, fetchFn } = mkClient({ item: row });
 
-      await updateContent("my schema", "my id", {}, client);
+      await updateContent("my schema", "my id", { title: "x" }, client);
 
       const [url] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/my%20schema/my%20id");
@@ -288,11 +272,9 @@ describe("ContentService (REST gateway)", () => {
     });
   });
 
-  // deleteContent
-
   describe("deleteContent()", () => {
-    it("DELETEs /api/content/{schema}/{id} and returns undefined on 204", async () => {
-      const { client, fetchFn } = mkClient(undefined, 204);
+    it("DELETEs /api/content/{schema}/{id} and resolves to undefined", async () => {
+      const { client, fetchFn } = mkClient({ deleted: "abc-123" });
 
       const result = await deleteContent("article", "abc-123", client);
 
@@ -303,7 +285,7 @@ describe("ContentService (REST gateway)", () => {
     });
 
     it("encodes schema name and id in URL", async () => {
-      const { client, fetchFn } = mkClient(undefined, 204);
+      const { client, fetchFn } = mkClient({ deleted: "my id" });
 
       await deleteContent("my schema", "my id", client);
 
@@ -312,14 +294,13 @@ describe("ContentService (REST gateway)", () => {
     });
 
     it("propagates API errors", async () => {
-      const { client } = mkClient({ error: "not found" }, 404);
+      const { client } = mkClient({ error: "forbidden" }, 403);
 
-      const err = await deleteContent("article", "missing", client).catch(
+      const err = await deleteContent("article", "abc-123", client).catch(
         (e: unknown) => e,
       );
 
-      expect((err as any).status).toBe(404);
-      expect((err as any).message).toBe("not found");
+      expect((err as any).status).toBe(403);
     });
   });
 });
