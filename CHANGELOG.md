@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `listContent` and `getContent` take `{ locale }` as a last argument. When the localization plugin is on, the rows are served in that language and each carries `resolved_locale`.
+
 ### Changed
 
 - Breaking: every function returns the gateway's answer as the gateway sends it, typed as `GatewaySchema` (a schema's name and stored definition) or `GatewayRow` (an entry's stored row, flat, with its fields beside `id` and no `data` envelope).

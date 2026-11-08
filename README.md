@@ -94,15 +94,15 @@ await deleteContent("articles", article.id, client);
 
 ## API
 
-| Service        | Function                                       | HTTP                                |
-| -------------- | ---------------------------------------------- | ----------------------------------- |
-| SchemaService  | `listSchemas(client)`                          | `GET /api/schemas`                  |
-| SchemaService  | `getSchema(name, client)`                      | `GET /api/schemas/{name}`           |
-| ContentService | `listContent(schema, client, limit?, offset?)` | `GET /api/content/{schema}`         |
-| ContentService | `getContent(schema, id, client)`               | `GET /api/content/{schema}/{id}`    |
-| ContentService | `createContent(schema, data, client)`          | `POST /api/content/{schema}`        |
-| ContentService | `updateContent(schema, id, data, client)`      | `PUT /api/content/{schema}/{id}`    |
-| ContentService | `deleteContent(schema, id, client)`            | `DELETE /api/content/{schema}/{id}` |
+| Service        | Function                                                 | HTTP                                |
+| -------------- | -------------------------------------------------------- | ----------------------------------- |
+| SchemaService  | `listSchemas(client)`                                    | `GET /api/schemas`                  |
+| SchemaService  | `getSchema(name, client)`                                | `GET /api/schemas/{name}`           |
+| ContentService | `listContent(schema, client, limit?, offset?, options?)` | `GET /api/content/{schema}`         |
+| ContentService | `getContent(schema, id, client, options?)`               | `GET /api/content/{schema}/{id}`    |
+| ContentService | `createContent(schema, data, client)`                    | `POST /api/content/{schema}`        |
+| ContentService | `updateContent(schema, id, data, client)`                | `PUT /api/content/{schema}/{id}`    |
+| ContentService | `deleteContent(schema, id, client)`                      | `DELETE /api/content/{schema}/{id}` |
 
 Gateway paths use `/api/schemas/*` and `/api/content/*`. Not the admin
 `/api/admin/*` or content `/api/v1/*` paths. Write bodies are the raw field map,
@@ -118,6 +118,11 @@ keeps, and no `data` envelope.
 release on takes a limit of 1 to 500 (50 when left out) and an offset of 0 or
 more, and refuses a value that is not an integer with 400. An earlier gateway
 drops both and serves the first 50 rows.
+
+`listContent` and `getContent` take `{ locale }` last. When the localization
+plugin is on, rows are served in that language, each carries `resolved_locale`,
+and a value that is not a language tag is refused with 400. Without the plugin
+the value is ignored.
 
 ## Local development
 

@@ -144,6 +144,15 @@ describe("ContentService (REST gateway)", () => {
       expect(url).toBe("/api/content/article?offset=10");
     });
 
+    it("sends the locale beside the page", async () => {
+      const { client, fetchFn } = mkClient({ items: [] });
+
+      await listContent("article", client, 10, 0, { locale: "pt-BR" });
+
+      const [url] = fetchFn.mock.calls[0];
+      expect(url).toBe("/api/content/article?limit=10&offset=0&locale=pt-BR");
+    });
+
     it("encodes schema name in URL", async () => {
       const { client, fetchFn } = mkClient({ items: [] });
 
@@ -178,6 +187,19 @@ describe("ContentService (REST gateway)", () => {
       const [url, init] = fetchFn.mock.calls[0];
       expect(url).toBe("/api/content/article/abc-123");
       expect(init.method).toBe("GET");
+    });
+
+    it("sends the locale", async () => {
+      const localized = { ...row, title: "Teste", resolved_locale: "pt-BR" };
+      const { client, fetchFn } = mkClient({ item: localized });
+
+      const result = await getContent("article", "abc-123", client, {
+        locale: "pt-BR",
+      });
+
+      expect(result.resolved_locale).toBe("pt-BR");
+      const [url] = fetchFn.mock.calls[0];
+      expect(url).toBe("/api/content/article/abc-123?locale=pt-BR");
     });
 
     it("encodes both schema name and id", async () => {

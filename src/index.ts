@@ -44,6 +44,16 @@ export interface GatewayRow {
   [column: string]: unknown;
 }
 
+/** Options for a content read through the gateway. */
+export interface GatewayReadOptions {
+  /**
+   * The language tag to serve rows in. When the localization plugin is on,
+   * rows are served in it and a value that is not a language tag is refused
+   * with 400. Without the plugin the value is ignored.
+   */
+  locale?: string;
+}
+
 // SchemaService
 
 /** GET /api/schemas: list all schemas via gRPC gateway. */
@@ -77,10 +87,12 @@ export async function listContent(
   client: HttpClient,
   limit?: number,
   offset?: number,
+  options: GatewayReadOptions = {},
 ): Promise<GatewayRow[]> {
   const params = new URLSearchParams();
   if (limit !== undefined) params.set("limit", String(limit));
   if (offset !== undefined) params.set("offset", String(offset));
+  if (options.locale) params.set("locale", options.locale);
   const qs = params.toString();
   // The gateway answers {"items": [...]}, the shape of ListContentResponse.
   const res = await client.get<{ items: GatewayRow[] }>(
@@ -94,9 +106,13 @@ export async function getContent(
   schemaName: string,
   id: string,
   client: HttpClient,
+  options: GatewayReadOptions = {},
 ): Promise<GatewayRow> {
+  const qs = options.locale
+    ? `?${new URLSearchParams({ locale: options.locale })}`
+    : "";
   const res = await client.get<{ item: GatewayRow }>(
-    `/api/content/${encodeURIComponent(schemaName)}/${encodeURIComponent(id)}`,
+    `/api/content/${encodeURIComponent(schemaName)}/${encodeURIComponent(id)}${qs}`,
   );
   return res.item;
 }
