@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `listContent` and `getContent` take `{ locale }` as a last argument. When the localization plugin is on, the rows are served in that language and each carries `resolved_locale`.
+- The same options take `fields`, `populate` and `depth`, and `listContent`'s take `filters` (`GatewayListOptions`). `fields` keeps only the named fields of each row, `populate` serves relations as the records they point at, `depth` populates every relation to that many levels, and `filters` keeps the rows whose fields equal the given values. They take effect with the gRPC plugin's next release, whose gateway reads them, and an earlier gateway ignores all four.
 
 ### Changed
 

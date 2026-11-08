@@ -124,6 +124,34 @@ plugin is on, rows are served in that language, each carries `resolved_locale`,
 and a value that is not a language tag is refused with 400. Without the plugin
 the value is ignored.
 
+From the gRPC plugin's next release on, the same options take `fields`,
+`populate` and `depth`, and `listContent`'s take `filters`. An earlier gateway
+ignores all four.
+
+- `fields` keeps only the named fields of each row, beside `id`, `created_at`,
+  `updated_at` and `resolved_locale`. A name the type does not declare, or one
+  the caller may not read, is refused with 400.
+- `populate` serves a relation as the record it points at: a belongs_to or
+  has_one as a record or `null`, a has_many or many_to_many as a list, newest
+  first. `author.company` reaches a relation of the related record, `*`
+  populates every relation at its level, and `author{name}` keeps only the
+  named fields of each record. A relation into a type the caller may not read
+  is left out of the row.
+- `depth` populates every relation, to that many levels, from 0 to 10.
+- `filters` maps field names to the values those fields must equal. Each value
+  is read by its field's type (`true` or `false`, a number, a UUID, a date
+  written `2006-01-02`, an RFC 3339 time), and one its field cannot hold is
+  refused with 400. A name the type does not declare is ignored, so a
+  misspelled field filters nothing.
+
+```ts
+const posts = await listContent("posts", client, 20, 0, {
+  filters: { featured: "true" },
+  fields: ["title", "author"],
+  populate: ["author{name}"],
+});
+```
+
 ## Local development
 
 ```bash
